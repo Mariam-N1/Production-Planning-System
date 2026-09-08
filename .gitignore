@@ -18,3 +18,4 @@ appsettings.*.local.json
 
 # VS Code
 .vscode/
+_backup/
