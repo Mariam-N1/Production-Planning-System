@@ -1,9 +1,5 @@
 @import "primeicons/primeicons.css";
 
-/* =========================================================
-   1. BASICS
-   ========================================================= */
-
 * { box-sizing: border-box; }
 
 html, body { height: 100%; }
@@ -17,19 +13,13 @@ body {
   background: #F1F5F7;
 }
 
-
-/* =========================================================
-   2. SHARED SCREEN PARTS — used by EVERY page
-   ========================================================= */
-
 .content > *:not(router-outlet) {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
 }
-/* Angular puts the opened page inside .content as its own tag.
-   That tag has to stretch too, or the white box collapses. */
+
 
 .screen {
   flex: 1;
@@ -89,14 +79,6 @@ body {
   justify-content: center;
   color: #98A2B3;
 }
-/* used by the home / approvals / settings placeholder pages */
-
-
-/* =========================================================
-   3. PRIMENG TABLE
-   <p-table> builds its own <table>, so a component css file
-   cannot reach it. .grid is the styleClass on <p-table>.
-   ========================================================= */
 
 .grid {
   height: 100%;
@@ -116,11 +98,7 @@ body {
   border-collapse: separate;
   border-spacing: 0;
 }
-/* width:100% makes the 8 columns share the card. min-width stops
-   them squashing on a narrow screen — .table-box scrolls instead. */
 
-/* COLUMN WIDTHS now come from the columns array in the TS
-   ([style.width] on each <th>), so hiding a column cannot shift them. */
 
 .grid th,
 .grid td {
@@ -201,14 +179,6 @@ body {
 }
 /* the "No products found." line */
 
-
-/* =========================================================
-   4. PRIMENG DROPDOWN — the items-per-page box
-   PrimeNG builds this, and the open list lives in an overlay on the
-   page body, so both have to be styled from here, not the component.
-   ========================================================= */
-
-/* the closed box */
 .page-dropdown {
   min-width: 40px;
   border: 1px solid #6166CF;
@@ -249,12 +219,6 @@ body {
 /* the open list */
 .p-select-option:hover                    { background: #F4F4FB; }
 .p-select-option.p-select-option-selected { background: #F1EDFF; color: #6166CF; }
-
-
-/* =========================================================
-   5. PRIMENG PAGINATOR — page buttons + rows-per-page dropdown
-   PrimeNG builds all of this, so it is styled from here.
-   ========================================================= */
 
 .p-paginator {
   padding: 0;
@@ -331,12 +295,6 @@ body {
 }
 
 
-/* =========================================================
-   6. PRIMENG DIALOG — the Create New window
-   PrimeNG builds the window, the title bar and the grey sheet
-   behind it, so all three are styled from here.
-   ========================================================= */
-
 .new-dialog {
   width: 560px;
   max-width: 90vw;        /* on a phone: 90% of the screen width */
@@ -371,13 +329,6 @@ body {
 /* the grey sheet behind the window */
 .p-dialog-mask { background: rgba(16, 24, 40, 0.45); }
 
-
-/* =========================================================
-   7. PRIMENG MENU — the little Edit / Delete list on a row
-   appendTo="body" puts it on the page body, so it is styled
-   from here and never clipped by the scrolling table.
-   ========================================================= */
-
 .p-menu {
   padding: 4px;
   border: 1px solid #E4E7EC;
@@ -397,10 +348,60 @@ body {
 .p-menu .p-menu-item-icon { font-size: 13px; }
 
 
-/* =========================================================
-   8. PRIMENG POPOVER — the Field Chooser panel
-   ========================================================= */
-
 .fields-panel { border: 1px solid #E4E7EC; border-radius: 8px; }
 
 .fields-panel .p-popover-content { padding: 8px; }
+
+/* =========================================================
+   DARK MODE
+   ThemeService puts data-theme="dark" on <html>. Everything
+   below only applies while that attribute is there, so the
+   light design is untouched.
+   ========================================================= */
+
+:root {
+  color-scheme: light;
+
+  --bg:         #F1F5F7;
+  --surface:    #FFFFFF;   /* cards, header bars, the sidebar */
+  --surface-2:  #F4F4FB;   /* hover fills, quiet panels */
+  --border:     #E4E7EC;
+  --border-2:   #D0D5DD;
+  --text:       #101828;
+  --text-2:     #344054;
+  --muted:      #667085;
+  --muted-2:    #98A2B3;
+  --accent:     #6166CF;
+  --accent-soft:#F1EDFF;
+  --shadow:     rgba(16, 24, 40, 0.10);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg:         #14161F;
+  --surface:    #1C1F2B;
+  --surface-2:  #252938;
+  --border:     #2E3346;
+  --border-2:   #3A4055;
+  --text:       #E8EAF2;
+  --text-2:     #C3C7D6;
+  --muted:      #9AA0B4;
+  --muted-2:    #7B8199;
+  --accent:     #8C90E8;
+  --accent-soft:#2A2E48;
+  --shadow:     rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- the global chrome ---------- */
+[data-theme="dark"] body { background: var(--bg); color: var(--text-2); }
+
+[data-theme="dark"] .heading,
+[data-theme="dark"] .box {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .big-title   { color: var(--text); }
+[data-theme="dark"] .small-title,
+[data-theme="dark"] .box-empty   { color: var(--muted); }

@@ -1,7 +1,9 @@
-<div class="layout" [class.menu-open]="layout.menuOpen">
+<!-- One outlet only. On login / signup / forgot the sidebar is skipped
+     and the page fills the window. -->
+<div class="layout" [class.menu-open]="layout.menuOpen" [class.bare]="isAuthPage">
 
   <!-- ============ LEFT SIDEBAR ============ -->
-  <div class="sidebar" (click)="layout.closeMenu()">
+  <div class="sidebar" *ngIf="!isAuthPage" (click)="layout.closeMenu()">
 
     <img class="logo" src="assets/brand/logo.png">
 
@@ -11,9 +13,26 @@
         <span class="menu-icon"><img src="assets/dashboard/home.png"></span>
       </a>
 
-      <a class="menu-btn planning-btn" routerLink="/planning" routerLinkActive="active">
-        <span class="menu-icon"><img src="assets/dashboard/plus.png"></span>
-      </a>
+      <!-- Hover (or click) this icon to choose one of the three table screens. They are the same component with a different config. -->
+      <div class="menu-slot"
+           (mouseenter)="screensOpen = true"
+           (mouseleave)="screensOpen = false">
+
+        <button class="menu-btn planning-btn"
+                (click)="$event.stopPropagation(); screensOpen = !screensOpen">
+          <span class="menu-icon"><img src="assets/dashboard/plus.png"></span>
+        </button>
+
+        <div class="flyout" *ngIf="screensOpen">
+          <a class="flyout-item" routerLink="/products" routerLinkActive="active"
+             (click)="screensOpen = false">Products</a>
+          <a class="flyout-item" routerLink="/paint" routerLinkActive="active"
+             (click)="screensOpen = false">Shades</a>
+          <a class="flyout-item" routerLink="/packing" routerLinkActive="active"
+             (click)="screensOpen = false">Packing</a>
+        </div>
+
+      </div>
 
       <a class="menu-btn approvals-btn" routerLink="/approvals" routerLinkActive="active">
         <span class="menu-icon"><img src="assets/dashboard/token.png"></span>
@@ -25,7 +44,34 @@
 
     </div>
 
-    <img class="my-photo" src="assets/people/Me.png">
+    <!-- ============ ACCOUNT (click the memoji) ============ -->
+    <div class="account-slot" (click)="$event.stopPropagation()">
+
+      <button class="avatar-btn" (click)="accountOpen = !accountOpen" title="Account">
+        <img class="my-photo" src="assets/people/Me.png">
+        <span class="dot"></span>
+      </button>
+
+      <div class="account-card" *ngIf="accountOpen">
+
+        <div class="account-head">
+          <span class="account-initials">{{ auth.initials }}</span>
+          <div class="account-who">
+            <strong>{{ auth.user?.fullName }}</strong>
+            <span>{{ auth.user?.email }}</span>
+          </div>
+        </div>
+
+        <div class="account-meta" *ngIf="memberSince">Member since {{ memberSince }}</div>
+
+        <div class="account-sep"></div>
+
+        <a class="account-item" routerLink="/settings" (click)="accountOpen = false">Settings</a>
+        <button class="account-item danger" type="button" (click)="signOut()">Sign out</button>
+
+      </div>
+
+    </div>
 
   </div>
 

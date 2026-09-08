@@ -1,9 +1,3 @@
-/* =========================================================
-   SECTION A — LAYOUT
-   Position, size and spacing only. Change how things LOOK
-   in SECTION B at the bottom instead.
-   ========================================================= */
-
 
 /* ---------- the heading bar: title left, room on the right ---------- */
 .heading {
@@ -279,7 +273,7 @@
 }
 
 .search-input::placeholder { color: #919292; font-size: 13px; font-weight: 400; }
-.search-input:focus { border-bottom-color: #7B5CF5; }
+.search-input:focus { border-bottom-color: #6166CF; }
 
 
 /* ==================== BOTTOM BAR ==================== */
@@ -370,7 +364,7 @@
   border-radius: 6px;
 }
 .sort-btn .btn-icon { width: 13px; height: 15px; }
-.sort-btn:hover { background: #F1EDFF; color: #7B5CF5; }
+.sort-btn:hover { background: #F1EDFF; color: #6166CF; }
 
 
 /* ---------- 3c. the columns button (next to sort) ---------- */
@@ -384,7 +378,7 @@
   border-radius: 6px;
 }
 .columns-btn .btn-icon { width: 18px; height: 18px; }
-.columns-btn:hover { background: #F1EDFF; color: #7B5CF5; }
+.columns-btn:hover { background: #F1EDFF; color: #6166CF; }
 
 
 /* ---------- 4. Create New (the whole button is one SVG) ---------- */
@@ -570,3 +564,265 @@
   /* the dialog form drops to one box per row */
   .form { grid-template-columns: 1fr; }
 }
+/* ============ DROPDOWN + TICK LIST IN THE DIALOG ============ */
+
+/* the native select is styled to match .field-input */
+select.field-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%23667085' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+/* the many-to-many picker: a scrollable box of checkboxes */
+.tick-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+
+  max-height: 132px;
+  overflow-y: auto;
+  padding: 10px 12px;
+
+  border: 1px solid #D0D5DD;
+  border-radius: 8px;
+  background: #FFFFFF;
+}
+
+.tick {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 150px;
+  font-size: 13px;
+  color: #344054;
+  cursor: pointer;
+}
+
+.tick input { cursor: pointer; }
+
+.tick-empty {
+  margin: 0;
+  font-size: 13px;
+  color: #98A2B3;
+}
+
+/* ============ COLOUR CIRCLES ============ */
+
+/* one circle. The colour comes from the row, set inline. */
+.swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(16, 24, 40, 0.15);
+  flex: none;
+}
+
+/* circle + hex text in a table cell */
+.swatch-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============ THE COLOUR PICKER IN THE DIALOG ============ */
+
+.picker { position: relative; }
+
+/* the closed button: shows the chosen circle and its name */
+.picker-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  background: #FFFFFF;
+}
+
+/* the open panel */
+.picker-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+
+  max-height: 210px;
+  overflow-y: auto;
+  padding: 6px;
+
+  background: #FFFFFF;
+  border: 1px solid #E4E7EC;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+}
+
+.picker-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.picker-option:hover { background: #F4F4FB; }
+
+.picker-name { flex: 1; color: #344054; font-size: 13px; }
+
+.picker-hex {
+  color: #98A2B3;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the colour picker sits next to its hex box */
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-hex {
+  flex: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the picker panel is on <body> now, so it must sit above the dialog */
+:host ::ng-deep .p-colorpicker-panel { z-index: 2000 !important; }
+
+/* the little colour square that opens the picker */
+:host ::ng-deep .p-colorpicker-preview {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #D0D5DD;
+  cursor: pointer;
+}
+
+/* ============ THE SHADE PICKER ============ */
+
+.shade-picker { display: flex; flex-direction: column; gap: 8px; }
+
+.shade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: 8px;
+
+  max-height: 190px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.shade-chip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding: 9px 11px;
+  background: #FFFFFF;
+  border: 1px solid #D0D5DD;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: border-color .12s, background .12s;
+}
+
+.shade-chip:hover { border-color: #9A8CFF; }
+
+.shade-chip.on {
+  border-color: #6166CF;
+  background: #F1EDFF;
+}
+
+.shade-chip .swatch { width: 18px; height: 18px; }
+
+.shade-chip-name {
+  flex: 1;
+  font-size: 13px;
+  color: #344054;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shade-chip.on .shade-chip-name { color: #4E52A6; font-weight: 600; }
+
+.shade-chip-tick { font-size: 12px; color: #6166CF; }
+
+.shade-note { margin: 0; font-size: 12px; color: #98A2B3; }
+
+/* small grey text on a chip, e.g. the litres on a packing */
+.shade-chip-sub {
+  font-size: 12px;
+  color: #98A2B3;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+.shade-chip.on .shade-chip-sub { color: #6166CF; }
+
+
+/* ============ DARK MODE ============ */
+:host-context([data-theme="dark"]) .heading,
+:host-context([data-theme="dark"]) .table-box,
+:host-context([data-theme="dark"]) .top-bar,
+:host-context([data-theme="dark"]) .bottom-bar,
+:host-context([data-theme="dark"]) .picker-panel,
+:host-context([data-theme="dark"]) .fields-list {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+:host-context([data-theme="dark"]) .planning-title,
+:host-context([data-theme="dark"]) .heading-text { color: var(--text); }
+
+:host-context([data-theme="dark"]) .record-count,
+:host-context([data-theme="dark"]) .range-text,
+:host-context([data-theme="dark"]) .per-page-text,
+:host-context([data-theme="dark"]) .shade-note,
+:host-context([data-theme="dark"]) .picker-hex,
+:host-context([data-theme="dark"]) .shade-chip-sub { color: var(--muted); }
+
+:host-context([data-theme="dark"]) .search-box,
+:host-context([data-theme="dark"]) .field-input,
+:host-context([data-theme="dark"]) .picker-btn,
+:host-context([data-theme="dark"]) .shade-chip {
+  background: var(--surface-2);
+  border-color: var(--border-2);
+  color: var(--text);
+}
+
+:host-context([data-theme="dark"]) .search-input { color: var(--text); background: transparent; }
+:host-context([data-theme="dark"]) .search-input::placeholder,
+:host-context([data-theme="dark"]) .field-input::placeholder { color: var(--muted-2); }
+
+:host-context([data-theme="dark"]) .btn,
+:host-context([data-theme="dark"]) .small-btn,
+:host-context([data-theme="dark"]) .sort-btn,
+:host-context([data-theme="dark"]) .filter-btn,
+:host-context([data-theme="dark"]) .columns-btn,
+:host-context([data-theme="dark"]) .fields-btn,
+:host-context([data-theme="dark"]) .dots-btn {
+  background: var(--surface-2);
+  border-color: var(--border-2);
+  color: var(--text-2);
+}
+
+:host-context([data-theme="dark"]) .picker-option:hover,
+:host-context([data-theme="dark"]) .shade-chip:hover { background: var(--accent-soft); }
+
+:host-context([data-theme="dark"]) .line,
+:host-context([data-theme="dark"]) .sort-line,
+:host-context([data-theme="dark"]) .field-line { background: var(--border); }

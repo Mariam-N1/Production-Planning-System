@@ -3,14 +3,11 @@
   <!-- ============ HEADING ============ -->
   <div class="heading">
     <div class="heading-text">
-      <p class="small-title">Setting | Sales Order Approvals</p>
+      <p class="small-title">{{ config.breadcrumb }}</p>
 
-      <!-- title and button on ONE row, so the button lines up with
-           the title by itself — no margin numbers to guess. -->
       <div class="heading-row">
-        <h1 class="big-title planning-title">Production Planning Standard</h1>
+        <h1 class="big-title planning-title">{{ config.title }}</h1>
 
-        <!-- 3-line button. Hidden above 768px. Opens the sidebar. -->
         <button class="menu-toggle" (click)="layout.toggleMenu()" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
@@ -25,7 +22,7 @@
     <div class="top-bar">
 
       <div class="search-box">
-        <input type="text" placeholder="Search here by Plan no"
+        <input type="text" [placeholder]="config.searchHolder"
                (input)="onSearch($any($event.target).value)">
         <i class="pi pi-search"></i>
       </div>
@@ -38,12 +35,11 @@
           <span>Advance Filter</span>
         </button>
         <span class="line"></span>
-        <!-- click = open the little sort list -->
+
         <button class="small-btn sort-btn" (click)="sortPanel.toggle($event)">
           <img class="btn-icon" src="assets/buttons/arrows.png">
         </button>
 
-        <!-- SORT LIST. The one in use is highlighted purple. -->
         <p-popover #sortPanel styleClass="fields-panel">
           <div class="fields-list">
             <button class="field-line sort-line" *ngFor="let o of sortOptions"
@@ -54,15 +50,14 @@
           </div>
         </p-popover>
         <span class="line"></span>
+
         <button class="small-btn columns-btn" (click)="fields.toggle($event)">
           <img class="btn-icon" src="assets/buttons/box.png">
         </button>
 
-        <!-- FIELD CHOOSER. One checkbox per line in the columns array,
-             so a new column appears here on its own. -->
         <p-popover #fields styleClass="fields-panel">
           <div class="fields-list">
-            <label class="field-line" *ngFor="let col of columns">
+            <label class="field-line" *ngFor="let col of tableColumns">
               <input type="checkbox" [(ngModel)]="col.visible" (ngModelChange)="toggleColumn(col)">
               <span>{{ col.header }}</span>
             </label>
@@ -73,41 +68,45 @@
             <button class="fields-btn" (click)="selectAll()">Select All</button>
           </div>
         </p-popover>
-        <button class="create-img-btn" (click)="openDialog()"><img src="assets/buttons/new.svg" alt="Create New"></button>
+
+        <button class="create-img-btn" (click)="openDialog()">
+          <img src="assets/buttons/new.svg" alt="Create New">
+        </button>
       </div>
 
     </div>
 
     <!-- ============ TABLE ============ -->
     <div class="table-box">
-      <p-table [value]="products" styleClass="grid">
+      <!-- rowTrackBy lets the table reuse a row whose id has not changed, instead of rebuilding every <tr> on each load -->
+      <p-table [value]="rows_" styleClass="grid"
+               [loading]="loading" [rowTrackBy]="trackById">
 
         <ng-template pTemplate="header">
-          <!-- one <th> per TICKED column, straight from the array -->
           <tr class="title-row">
             <th *ngFor="let col of shownColumns" [style.width]="col.width">{{ col.header }}</th>
           </tr>
-          <!-- one box per column. Second argument = which field it searches.
-               hide-row is added when Advance Filter is off — ONE class on
-               the row hides all 8 boxes at once. -->
           <tr class="search-row" [class.hide-row]="!showSearch">
             <th *ngFor="let col of shownColumns">
               <input class="search-input" [placeholder]="col.holder"
-                     (input)="search($any($event.target).value, col.field)">
+                     (input)="search($any($event.target).value, col)">
             </th>
           </tr>
         </ng-template>
 
         <ng-template pTemplate="body" let-p>
-          <!-- the click is on each CELL, not on the <tr>.
-               The last cell (stock + dots) deliberately has none, so the
-               dots can never open the edit dialog. -->
           <tr class="row">
-            <td *ngFor="let col of shownColumns" (click)="col.field === lastField ? null : openEdit(p.id)">
+            <td *ngFor="let col of shownColumns"
+                (click)="col.field === lastField ? null : openEdit(p.id)">
 
-              <!-- the LAST visible column also holds the 3 dots -->
               <div class="stock-cell" *ngIf="col.field === lastField; else plainCell">
-                <span>{{ cellText(p, col) }}</span>
+
+                <!-- the last column carries the 3 dots, so it needs its own copy of the swatch rendering -->
+                <span class="swatch-cell" *ngIf="col.format === 'swatch'; else lastPlain">
+                  <span class="swatch" [style.background]="p[col.field] || 'transparent'"></span>
+                  <span>{{ cellText(p, col) }}</span>
+                </span>
+                <ng-template #lastPlain><span>{{ cellText(p, col) }}</span></ng-template>
 
                 <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body" />
 
@@ -116,12 +115,17 @@
                 </button>
               </div>
 
-              <ng-template #plainCell>{{ cellText(p, col) }}</ng-template>
+              <ng-template #plainCell>
+                <span class="swatch-cell" *ngIf="col.format === 'swatch'; else justText">
+                  <span class="swatch" [style.background]="p[col.field] || 'transparent'"></span>
+                  <span>{{ cellText(p, col) }}</span>
+                </span>
+                <ng-template #justText>{{ cellText(p, col) }}</ng-template>
+              </ng-template>
             </td>
           </tr>
         </ng-template>
 
-        <!-- blank row so the column lines reach the bottom -->
         <ng-template pTemplate="footer">
           <tr class="blank-row">
             <td *ngFor="let col of shownColumns"></td>
@@ -130,7 +134,9 @@
 
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td [attr.colspan]="colCount" class="empty-msg">No products found.</td>
+            <td [attr.colspan]="colCount" class="empty-msg">
+              {{ loadError || 'No records found.' }}
+            </td>
           </tr>
         </ng-template>
 
@@ -147,7 +153,6 @@
         [totalRecords]="total"
         (onPageChange)="onPageChange($event)" />
 
-      <!-- how many rows to show at once -->
       <div class="per-page">
         <p-select styleClass="page-dropdown"
                   [options]="dropdownOptions"
@@ -161,14 +166,8 @@
 
   </div>
 
-
-
-
-
-  <!-- ============ CREATE NEW DIALOG ============
-       p-dialog centres itself, so there is no position CSS anywhere.
-       [(visible)] is what opens and closes it. -->
-  <p-dialog [header]="editId ? 'Edit Product' : 'Create New Product'"
+  <!-- ============ CREATE / EDIT DIALOG ============ The fields are generated from the config's columns, so each screen gets its own form for free. -->
+  <p-dialog [header]="editId ? 'Edit Record' : 'Create New Record'"
             [(visible)]="showDialog"
             [modal]="true"
             [draggable]="false"
@@ -177,45 +176,63 @@
 
     <div class="form">
 
-      <!-- full width, because a title is long -->
-      <div class="field wide">
-        <label>Title</label>
-        <!-- typing clears the red line, so it can never sit there stale -->
-        <input class="field-input" [(ngModel)]="newProduct.title"
-               (input)="formError = ''" placeholder="Product name">
+      <div class="field" *ngFor="let col of formColumns" [class.wide]="col.wide">
+        <label>{{ col.header }}</label>
+
+        <!-- A FOREIGN KEY. You pick a name; the id is what gets sent. -->
+        <select *ngIf="col.type === 'select' || col.type === 'choice'" class="field-input"
+                [(ngModel)]="newRow[col.field]" (change)="formError = ''">
+          <option [ngValue]="null" disabled>Choose {{ col.header }}</option>
+          <option *ngFor="let o of optionsFor(col)" [ngValue]="optionValueOf(col, o)">
+            {{ optionLabelOf(col, o) }}
+          </option>
+        </select>
+
+        <!-- THE COLOUR PICKER. Both controls are bound to the SAME field, so picking a colour fills the hex box and typing a hex moves the picker. What gets saved is the text, e.g. "#6466f1". -->
+        <div *ngIf="col.type === 'color'" class="color-row">
+          <!-- appendTo="body" moves the panel OUT of the dialog, so the dialog's edges cannot cut it off and scrolling cannot close it. Same trick as the row menu above. -->
+          <p-colorpicker [(ngModel)]="newRow[col.field]"
+                         appendTo="body"
+                         (onChange)="formError = ''" />
+          <input class="field-input color-hex"
+                 [(ngModel)]="newRow[col.field]"
+                 (input)="formError = ''"
+                 placeholder="#000000">
+        </div>
+
+        <!-- THE SHADE PICKER. The list comes from the Shades screen. -->
+        <div *ngIf="col.type === 'multiselect'" class="shade-picker">
+          <div class="shade-grid">
+            <button type="button" class="shade-chip"
+                    *ngFor="let o of optionsFor(col)"
+                    [class.on]="isTicked(col, o)"
+                    (click)="toggleTick(col, o)">
+              <span class="swatch" *ngIf="col.optionColor"
+                    [style.background]="optionColorOf(col, o)"></span>
+              <span class="shade-chip-name">{{ optionLabelOf(col, o) }}</span>
+              <span class="shade-chip-sub" *ngIf="col.optionSub">{{ optionSubOf(col, o) }}</span>
+              <i class="pi pi-check shade-chip-tick" *ngIf="isTicked(col, o)"></i>
+            </button>
+          </div>
+
+          <p class="shade-note" *ngIf="optionsFor(col).length">
+            {{ tickedCount(col) }} selected
+          </p>
+          <p class="shade-note" *ngIf="!optionsFor(col).length">
+            Nothing to choose yet - add some on the {{ col.header }} screen.
+          </p>
+        </div>
+
+        <!-- plain text or number -->
+        <input *ngIf="col.type !== 'select' && col.type !== 'choice'
+                      && col.type !== 'color' && col.type !== 'multiselect'"
+               class="field-input"
+               [type]="col.type === 'number' ? 'number' : 'text'"
+               [(ngModel)]="newRow[col.field]"
+               (input)="formError = ''"
+               [placeholder]="col.type === 'number' ? '0' : col.header">
       </div>
 
-      <div class="field">
-        <label>Category</label>
-        <input class="field-input" [(ngModel)]="newProduct.category" placeholder="beauty">
-      </div>
-
-      <div class="field">
-        <label>Brand</label>
-        <input class="field-input" [(ngModel)]="newProduct.brand" placeholder="Brand name">
-      </div>
-
-      <div class="field">
-        <label>Price</label>
-        <input class="field-input" type="number" [(ngModel)]="newProduct.price" placeholder="0">
-      </div>
-
-      <div class="field">
-        <label>Discount %</label>
-        <input class="field-input" type="number" [(ngModel)]="newProduct.discountPercentage" placeholder="0">
-      </div>
-
-      <div class="field">
-        <label>Rating</label>
-        <input class="field-input" type="number" [(ngModel)]="newProduct.rating" placeholder="0">
-      </div>
-
-      <div class="field">
-        <label>Stock</label>
-        <input class="field-input" type="number" [(ngModel)]="newProduct.stock" placeholder="0">
-      </div>
-
-      <!-- only shows when something is wrong -->
       <p class="form-error wide" *ngIf="formError">{{ formError }}</p>
 
     </div>
@@ -229,12 +246,8 @@
 
   </p-dialog>
 
-
-
-
-  <!-- ============ ARE YOU SURE? ============
-       same window as the form, just a question and two buttons. -->
-  <p-dialog header="Delete product?"
+  <!-- ============ ARE YOU SURE? ============ -->
+  <p-dialog header="Delete record?"
             [(visible)]="showConfirm"
             [modal]="true"
             [draggable]="false"
@@ -242,7 +255,7 @@
             styleClass="new-dialog ask-dialog">
 
     <p class="ask-text" *ngIf="toDelete">
-      "{{ toDelete.title }}" will be removed from the list. This cannot be undone.
+      This record will be removed. This cannot be undone.
     </p>
 
     <ng-template pTemplate="footer">

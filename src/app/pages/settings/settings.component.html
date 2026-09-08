@@ -1,7 +1,189 @@
 <div class="screen">
+
   <div class="heading">
-    <p class="small-title">Setting | Settings</p>
+    <p class="small-title">Account | Settings</p>
     <h1 class="big-title">Settings</h1>
   </div>
-  <div class="box box-empty">Settings page</div>
+
+  <div class="settings">
+
+    <!-- ============ PROFILE ============ -->
+    <section class="card profile-card">
+
+      <div class="who">
+        <span class="big-initials">{{ auth.initials }}</span>
+
+        <div class="who-text">
+          <h2>{{ auth.user?.fullName }}</h2>
+          <p>{{ auth.user?.email }}</p>
+          <span class="since" *ngIf="memberSince">Member since {{ memberSince }}</span>
+          <span class="since role" *ngIf="auth.user?.role">{{ auth.user?.role === 'Admin' ? 'Approver' : 'Requester' }}</span>
+        </div>
+
+        <button class="ghost" type="button" *ngIf="!editing" (click)="startEdit()">Edit profile</button>
+      </div>
+
+      <p class="ok" *ngIf="profileDone && !editing">{{ profileDone }}</p>
+
+      <!-- the edit form slides in under the header -->
+      <form class="edit" *ngIf="editing" (ngSubmit)="saveProfile()" novalidate>
+
+        <label class="field">
+          <span>Full name</span>
+          <input type="text" name="fullName" autocomplete="name" [(ngModel)]="fullName">
+        </label>
+
+        <label class="field">
+          <span>Email</span>
+          <input type="email" name="email" autocomplete="email" [(ngModel)]="email">
+        </label>
+
+        <p class="bad" *ngIf="profileError">{{ profileError }}</p>
+
+        <div class="actions">
+          <button class="ghost" type="button" (click)="cancelEdit()">Cancel</button>
+          <button class="solid" type="submit" [disabled]="profileBusy">
+            {{ profileBusy ? 'Saving…' : 'Save changes' }}
+          </button>
+        </div>
+      </form>
+
+    </section>
+
+    <!-- ============ APPEARANCE ============ -->
+    <section class="card">
+      <h3 class="card-title">Appearance</h3>
+      <p class="card-sub">Currently showing the {{ theme.resolved }} theme.</p>
+
+      <div class="theme-row">
+        <button class="theme-opt" type="button"
+                *ngFor="let t of themes"
+                [class.on]="theme.choice === t.value"
+                (click)="setTheme(t.value)">
+
+          <span class="swatch-mini" [class.dark]="t.value === 'dark'" [class.auto]="t.value === 'system'"></span>
+          <strong>{{ t.label }}</strong>
+          <small>{{ t.hint }}</small>
+        </button>
+      </div>
+    </section>
+
+
+    <!-- ============ PASSWORD ============ -->
+    <section class="card">
+      <h3 class="card-title">Change password</h3>
+      <p class="card-sub">Choose a new password. You'll stay signed in here.</p>
+
+      <form (ngSubmit)="savePassword()" novalidate>
+
+        <label class="field">
+          <span>Current password</span>
+          <div class="with-button">
+            <input [type]="showCurrent ? 'text' : 'password'" name="current"
+                   autocomplete="current-password" [(ngModel)]="current">
+            <button type="button" class="peek" (click)="showCurrent = !showCurrent"
+                    [attr.aria-label]="showCurrent ? 'Hide password' : 'Show password'">
+              <svg *ngIf="!showCurrent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg *ngIf="showCurrent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3 3.6M6.5 7.7A17 17 0 0 0 2 12s3.6 6 10 6a9.7 9.7 0 0 0 4-.8"/>
+                <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M3 3l18 18"/>
+              </svg>
+            </button>
+          </div>
+        </label>
+
+        <div class="pair">
+          <label class="field">
+            <span>New password</span>
+            <div class="with-button">
+              <input [type]="showFresh ? 'text' : 'password'" name="fresh"
+                     autocomplete="new-password" [(ngModel)]="fresh">
+              <button type="button" class="peek" (click)="showFresh = !showFresh"
+                      [attr.aria-label]="showFresh ? 'Hide password' : 'Show password'">
+                <svg *ngIf="!showFresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg *ngIf="showFresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3 3.6M6.5 7.7A17 17 0 0 0 2 12s3.6 6 10 6a9.7 9.7 0 0 0 4-.8"/>
+                  <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M3 3l18 18"/>
+                </svg>
+              </button>
+            </div>
+          </label>
+
+          <label class="field">
+            <span>Confirm new password</span>
+            <input type="password" name="confirmNew" autocomplete="new-password" [(ngModel)]="confirm">
+            <small class="match" *ngIf="passwordsMatch" [class.bad-text]="passwordsMatch === 'differ'">
+              {{ passwordsMatch === 'match' ? '✓ Passwords match' : '✕ Passwords do not match yet' }}
+            </small>
+          </label>
+        </div>
+
+        <p class="bad" *ngIf="passwordError">{{ passwordError }}</p>
+        <p class="ok"  *ngIf="passwordDone">{{ passwordDone }}</p>
+
+        <div class="actions">
+          <button class="solid" type="submit" [disabled]="passwordBusy">
+            {{ passwordBusy ? 'Saving…' : 'Update password' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============ SESSION ============ -->
+    <section class="card">
+      <h3 class="card-title">Sign out</h3>
+      <p class="card-sub">You'll be signed out on this device. Your work stays exactly as you left it.</p>
+
+      <button class="ghost" type="button" (click)="signOut()">Sign out</button>
+    </section>
+
+    <!-- ============ DANGER ============ -->
+    <section class="card danger-card">
+      <h3 class="card-title">Delete account</h3>
+      <p class="card-sub">
+        Permanently closes your account. You won't be able to sign in again,
+        and this can't be undone.
+      </p>
+
+      <button class="danger" type="button" *ngIf="!confirmingDelete"
+              (click)="confirmingDelete = true">Delete my account</button>
+
+      <div class="confirm-box" *ngIf="confirmingDelete">
+        <p class="warn">Enter your password to permanently delete your account.</p>
+
+        <label class="field">
+          <span>Password</span>
+          <div class="with-button">
+            <input [type]="showDeletePassword ? 'text' : 'password'" name="deletePassword"
+                   autocomplete="current-password" [(ngModel)]="deletePassword">
+            <button type="button" class="peek" (click)="showDeletePassword = !showDeletePassword"
+                    [attr.aria-label]="showDeletePassword ? 'Hide password' : 'Show password'">
+              <svg *ngIf="!showDeletePassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg *ngIf="showDeletePassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3 3.6M6.5 7.7A17 17 0 0 0 2 12s3.6 6 10 6a9.7 9.7 0 0 0 4-.8"/>
+                <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M3 3l18 18"/>
+              </svg>
+            </button>
+          </div>
+        </label>
+
+        <p class="bad" *ngIf="deleteError">{{ deleteError }}</p>
+
+        <div class="actions">
+          <button class="ghost" type="button"
+                  (click)="confirmingDelete = false; deletePassword = ''; deleteError = ''">Keep my account</button>
+          <button class="danger" type="button" [disabled]="deleteBusy" (click)="removeAccount()">
+            {{ deleteBusy ? 'Deleting…' : 'Delete for good' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
 </div>

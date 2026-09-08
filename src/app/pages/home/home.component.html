@@ -1,1 +1,173 @@
-<p>home works!</p>
+<div class="home">
+
+  <div class="top">
+    <h1 class="big-title">Overview</h1>
+    <span class="stamp">{{ now }}</span>
+
+    <button class="menu-toggle" (click)="layout.toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <p class="state" *ngIf="loading">Loading&hellip;</p>
+  <p class="state err" *ngIf="loadError">{{ loadError }}</p>
+
+  <ng-container *ngIf="data && !loading">
+
+    <!-- ============ THE FAN DECK ============ -->
+    <section class="deck-wrap" *ngIf="data.shades.length">
+      <div class="deck-label">
+        <span class="eyebrow">Shade Deck &middot; {{ data.counts.shades }} colours</span>
+      </div>
+      <div class="deck">
+        <button class="swatch" *ngFor="let s of data.shades"
+                [class.dark]="isDark(s.colorCode)"
+                [style.background]="s.colorCode"
+                (click)="copyHex(s.colorCode)">
+          <span class="sw-meta">
+            <span class="sw-name">{{ s.shadeName }}</span>
+            <span class="sw-hex">{{ s.colorCode }}</span>
+          </span>
+        </button>
+
+        <!-- only when there are more shades than the deck shows -->
+        <button class="swatch rest" *ngIf="data.counts.shades > data.shades.length"
+                (click)="go('/paint')">
+          <span class="sw-meta">
+            <span class="sw-rest">+{{ data.counts.shades - data.shades.length }}</span>
+            <span class="sw-hex">more</span>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ TILES ============ -->
+    <section class="tiles">
+      <button class="tile" (click)="go('/products')">
+        <span class="tile-label">Products</span>
+        <span class="tile-num">{{ data.counts.products }}</span>
+        <span class="tile-sub">in the catalogue</span>
+      </button>
+
+      <button class="tile" (click)="go('/paint')">
+        <span class="tile-label">Shades</span>
+        <span class="tile-num">{{ data.counts.shades }}</span>
+        <span class="tile-sub">every hex unique</span>
+      </button>
+
+      <button class="tile" (click)="go('/packing')">
+        <span class="tile-label">Packings</span>
+        <span class="tile-num">{{ data.counts.packings }}</span>
+        <span class="tile-sub">container sizes</span>
+      </button>
+
+      <button class="tile value" (click)="go('/products')">
+        <span class="tile-label">Stock Value</span>
+        <span class="tile-num">{{ data.stockValue | number:'1.0-0' }}</span>
+        <span class="tile-sub">price &times; stock, all products</span>
+      </button>
+    </section>
+
+    <!-- ============ SELLABLE COMBINATIONS ============ -->
+    <section class="sku">
+      <span class="sku-part"><b>{{ data.counts.products }}</b> products</span>
+      <span class="sku-op">&times;</span>
+      <span class="sku-part">their <b>shades</b></span>
+      <span class="sku-op">&times;</span>
+      <span class="sku-part">their <b>packings</b></span>
+      <span class="sku-eq">=</span>
+      <span class="sku-total"><b>{{ data.skuCount | number }}</b> sellable combinations</span>
+      <span class="sku-note">every product / shade / size a customer can order</span>
+    </section>
+
+    <div class="grid">
+
+      <!-- LEFT -->
+      <div class="col">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Recent Products</h2>
+            <a class="more" (click)="go('/products')">View all</a>
+          </div>
+          <div class="rows">
+            <button class="row" *ngFor="let p of data.recent">
+              <span class="rail-strip" [style.background]="p.hexes[0] || '#E2E5EC'"></span>
+              <span class="r-title">{{ p.title }}</span>
+              <span class="r-cat">{{ p.category || '—' }}</span>
+              <span class="r-price">{{ p.price | number:'1.0-2' }}</span>
+              <span class="r-stock">
+                <span class="pill" [ngClass]="stockClass(p.stock)">{{ stockText(p.stock) }}</span>
+              </span>
+              <span class="dots">
+                <span class="dot" *ngFor="let h of p.hexes" [style.background]="h"></span>
+              </span>
+            </button>
+            <p class="empty" *ngIf="!data.recent.length">No products yet.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="col">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Needs Attention</h2>
+          </div>
+          <div class="attn">
+            <button class="attn-row warn" *ngIf="data.attention.noShade" (click)="go('/products')">
+              <span class="attn-n">{{ data.attention.noShade }}</span>
+              <span class="attn-t">products with no shade</span>
+            </button>
+            <button class="attn-row warn" *ngIf="data.attention.noPacking" (click)="go('/packing')">
+              <span class="attn-n">{{ data.attention.noPacking }}</span>
+              <span class="attn-t">products with no packing</span>
+            </button>
+            <button class="attn-row stop" *ngIf="data.attention.outOfStock" (click)="go('/products')">
+              <span class="attn-n">{{ data.attention.outOfStock }}</span>
+              <span class="attn-t">out of stock &mdash; {{ data.attention.outOfStockNames }}</span>
+            </button>
+            <button class="attn-row calm" *ngIf="data.attention.unusedShades" (click)="go('/paint')">
+              <span class="attn-n">{{ data.attention.unusedShades }}</span>
+              <span class="attn-t">shades used by nothing</span>
+            </button>
+            <p class="empty"
+               *ngIf="!data.attention.noShade && !data.attention.noPacking
+                      && !data.attention.outOfStock && !data.attention.unusedShades">
+              Nothing needs you right now.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel" *ngIf="data.topShades.length">
+          <div class="panel-head">
+            <h2>Most-Used Shades</h2>
+            <a class="more" (click)="go('/paint')">All {{ data.counts.shades }}</a>
+          </div>
+          <div class="tops">
+            <button class="top" *ngFor="let t of data.topShades" (click)="copyHex(t.colorCode)">
+              <span class="top-sw" [style.background]="t.colorCode"></span>
+              <span class="top-body">
+                <span class="top-name">{{ t.shadeName }}</span>
+                <span class="top-track">
+                  <span class="top-fill" [style.width]="topShadeWidth(t.count)"></span>
+                </span>
+              </span>
+              <span class="top-n">{{ t.count }}</span>
+            </button>
+            <p class="scale-note">Products carrying each shade.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ============ QUICK ACTIONS ============ -->
+    <section class="acts-band">
+      <button class="act" (click)="go('/products')"><span class="act-plus">+</span> New Product</button>
+      <button class="act" (click)="go('/paint')"><span class="act-plus">+</span> New Shade</button>
+      <button class="act" (click)="go('/packing')"><span class="act-plus">+</span> New Packing</button>
+    </section>
+
+  </ng-container>
+
+  <div class="toast" [class.show]="copied">{{ copied }} copied</div>
+</div>

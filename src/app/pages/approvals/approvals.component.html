@@ -1,7 +1,177 @@
 <div class="screen">
+
   <div class="heading">
-    <p class="small-title">Setting | Approvals</p>
+    <p class="small-title">Workflow | Approvals</p>
     <h1 class="big-title">Approvals</h1>
   </div>
-  <div class="box box-empty">Approvals page</div>
+
+  <div class="body">
+
+    <!-- one quiet line of context -->
+    <div class="summary" *ngIf="counts.pending">
+      <span><b>{{ counts.pending }}</b> {{ counts.pending === 1 ? 'run' : 'runs' }} waiting</span>
+      <span class="sep">|</span>
+      <span><b>{{ pendingLitres | number:'1.0-0' }} L</b> to sign off</span>
+      <ng-container *ngIf="oldestText">
+        <span class="sep">|</span>
+        <span>oldest has waited <b>{{ oldestText }}</b></span>
+      </ng-container>
+    </div>
+
+    <div class="bar">
+      <div class="tabs">
+        <button class="tab" type="button"
+                *ngFor="let t of tabs"
+                [class.on]="tab === t"
+                (click)="show(t)">
+          {{ t }} <span class="count">{{ countFor(t) }}</span>
+        </button>
+      </div>
+
+      <button class="new-btn" type="button" (click)="openForm()">+ New request</button>
+    </div>
+
+    <p class="err" *ngIf="loadError">{{ loadError }}</p>
+
+    <!-- ============ NEW REQUEST ============ -->
+    <div class="form-card" *ngIf="formOpen">
+      <h3>New production run</h3>
+
+      <div class="fields">
+        <label class="f">
+          <span>Product</span>
+          <select [(ngModel)]="form.productId" name="productId">
+            <option [ngValue]="0">Choose a product</option>
+            <option *ngFor="let p of products" [ngValue]="p.id">{{ p.title }}</option>
+          </select>
+        </label>
+
+        <label class="f">
+          <span>Shade</span>
+          <select [(ngModel)]="form.shadeId" name="shadeId">
+            <option [ngValue]="0">Choose a shade</option>
+            <option *ngFor="let s of shades" [ngValue]="s.id">{{ s.shadeName }}</option>
+          </select>
+        </label>
+
+        <label class="f">
+          <span>Pack size</span>
+          <select [(ngModel)]="form.packingId" name="packingId">
+            <option [ngValue]="0">Choose a pack</option>
+            <option *ngFor="let k of packings" [ngValue]="k.id">{{ k.packingName }} &middot; {{ k.size }} L</option>
+          </select>
+        </label>
+
+        <label class="f">
+          <span>Units</span>
+          <input type="number" min="1" [(ngModel)]="form.quantity" name="quantity" placeholder="0">
+        </label>
+      </div>
+
+      <label class="f full">
+        <span>Note <i>(optional)</i></span>
+        <input type="text" [(ngModel)]="form.note" name="note" maxlength="300"
+               placeholder="Anything the approver should know">
+      </label>
+
+      <p class="litres-preview" *ngIf="formLitres > 0">
+        That works out to <b>{{ formLitres | number:'1.0-0' }} L</b> of paint.
+      </p>
+
+      <p class="err" *ngIf="formError">{{ formError }}</p>
+
+      <div class="form-foot">
+        <button class="btn ghost" type="button" (click)="closeForm()">Cancel</button>
+        <button class="btn approve" type="button" [disabled]="saving" (click)="submit()">
+          {{ saving ? 'Sending…' : 'Send for approval' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ THE LIST ============ -->
+    <p class="state" *ngIf="loading">Loading&hellip;</p>
+
+    <div class="empty" *ngIf="!loading && !runs.length && !loadError">
+      Nothing {{ tab.toLowerCase() }} right now.
+    </div>
+
+    <div class="list" *ngIf="!loading && runs.length">
+
+      <article class="run" *ngFor="let r of runs">
+
+        <!-- the rail is the shade itself -->
+        <span class="rail" [style.background]="r.colorCode || '#E2E5EC'"></span>
+
+        <div class="run-main">
+          <div class="run-top">
+            <span class="run-id">#{{ r.id }}</span>
+            <h2 class="run-title">{{ r.productTitle }}</h2>
+          </div>
+
+          <div class="meta">
+            <span class="chip">
+              <span class="dot" [style.background]="r.colorCode || '#E2E5EC'"></span>
+              {{ r.shadeName }} <span class="hex">{{ r.colorCode }}</span>
+            </span>
+            <span>{{ r.packingName }} &middot; {{ r.packingSize }} L</span>
+            <span class="qty">{{ r.quantity | number }} units</span>
+            <span class="litres">{{ r.litres | number:'1.0-0' }} L</span>
+          </div>
+
+          <p class="who">
+            {{ r.requestedBy }} &middot;
+            <ng-container *ngIf="r.status === 'Pending'">
+              <span [class.aged]="isStale(r.createdAt)">
+                {{ isStale(r.createdAt) ? 'waiting ' + ago(r.createdAt).replace(' ago', '') : ago(r.createdAt) }}
+              </span>
+            </ng-container>
+            <ng-container *ngIf="r.status === 'Approved'">approved {{ stamp(r.decidedAt) }}</ng-container>
+            <ng-container *ngIf="r.status === 'Completed'">made {{ stamp(r.completedAt) }}</ng-container>
+            <ng-container *ngIf="r.status === 'Rejected'">rejected {{ stamp(r.decidedAt) }}</ng-container>
+          </p>
+
+          <p class="note" *ngIf="r.note">{{ r.note }}</p>
+          <p class="note stop" *ngIf="r.decision">{{ r.decision }}</p>
+
+          <!-- the reason box opens in place -->
+          <div class="reject-box" *ngIf="rejectingId === r.id && auth.isAdmin">
+            <input type="text" [(ngModel)]="rejectReason" name="reason" maxlength="300"
+                   placeholder="Why is this being rejected? (optional)">
+            <div class="reject-foot">
+              <button class="btn ghost" type="button" (click)="rejectingId = null">Cancel</button>
+              <button class="btn reject" type="button" [disabled]="busyId === r.id"
+                      (click)="confirmReject(r)">Confirm reject</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <span class="state-pill wait" *ngIf="r.status === 'Pending' && !auth.isAdmin">Waiting for approval</span>
+
+          <ng-container *ngIf="r.status === 'Pending' && auth.isAdmin && rejectingId !== r.id">
+            <button class="btn reject" type="button" (click)="startReject(r)">Reject</button>
+            <button class="btn approve" type="button" [disabled]="busyId === r.id" (click)="approve(r)">
+              {{ busyId === r.id ? 'Saving…' : 'Approve' }}
+            </button>
+          </ng-container>
+
+          <ng-container *ngIf="r.status === 'Approved'">
+            <span class="state-pill ok">Approved</span>
+            <button class="btn approve" type="button" *ngIf="auth.isAdmin"
+                    [disabled]="busyId === r.id" (click)="complete(r)">
+              {{ busyId === r.id ? 'Saving…' : 'Mark as made' }}
+            </button>
+          </ng-container>
+
+          <span class="state-pill done" *ngIf="r.status === 'Completed'">
+            Made &middot; +{{ r.quantity | number }} stock
+          </span>
+
+          <span class="state-pill no" *ngIf="r.status === 'Rejected'">Rejected</span>
+        </div>
+
+      </article>
+
+    </div>
+  </div>
 </div>

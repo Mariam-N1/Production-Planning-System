@@ -1,59 +1,31 @@
-# Screen
+# Production Planning — front end
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.19.
+Angular 21 + PrimeNG. Talks to the ASP.NET Core API in `BackendProject`.
 
-## Development server
-
-To start a local development server, run:
+## Running it
 
 ```bash
-ng serve
+npm install
+ng serve          # http://localhost:4200
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The API must be running first — see the backend's README. If it isn't,
+every screen shows "Could not reach the API".
 
-## Code scaffolding
+The API address lives in **one** place: `src/app/shared/api.ts`.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## How it's put together
 
-```bash
-ng generate component component-name
-```
+| Path | What |
+|---|---|
+| `app/auth/` | token, guards, sign in / up / reset |
+| `app/shared/data-screen/` | one table component, used by three screens |
+| `app/shared/screen-config.ts` | the three configs that drive it |
+| `app/shared/theme.service.ts` | light / dark, via `data-theme` on `<html>` |
+| `app/pages/` | one folder per screen |
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+**Products, Shades and Packing are the same component.** They differ only
+by the `ScreenConfig` passed in — columns, endpoint, search fields.
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+**Theming** is CSS custom properties. `ThemeService` sets one attribute on
+`<html>` and everything follows, PrimeNG included.
