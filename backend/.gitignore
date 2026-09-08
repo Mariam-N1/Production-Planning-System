@@ -1,0 +1,16 @@
+# build output
+bin/
+obj/
+
+# local settings - never commit these
+appsettings.Development.json
+appsettings.*.local.json
+*.user
+
+# editor
+.vs/
+.vscode/
+.idea/
+
+# mac
+.DS_Store
