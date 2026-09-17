@@ -1,145 +1,81 @@
 # Production Planning System
 
-A full-stack **Production Planning Management System** designed to manage and organize production planning data through a clean, responsive web interface.
+A full-stack production planning application built with **Angular, ASP.NET Core Web API, Entity Framework Core, and Microsoft SQL Server**.
 
-The project combines an **Angular frontend**, a **.NET Web API backend**, and a **SQL Server database**, demonstrating a complete full-stack application architecture with frontend–backend communication, API integration, database connectivity, and structured data management.
-
----
-
-## 📌 About the Project
-
-The Production Planning System was developed to provide a structured interface for managing production planning information.
-
-The application allows users to interact with production-related records through an organized dashboard and data table rather than working directly with raw database information.
-
-The project focuses on:
-
-* Full-stack application development
-* REST API integration
-* Database connectivity
-* Structured data management
-* Responsive user interface design
-* Separation of frontend and backend architecture
+The system provides a structured interface for managing production-related data with configurable data views, filtering, sorting, pagination, persistent user preferences, and RESTful backend integration.
 
 ---
 
-## ✨ Features
+## Overview
 
-### 📊 Production Planning Dashboard
+Production Planning System is designed around a modular full-stack architecture that separates the presentation, application, and persistence layers.
 
-The application provides a dedicated **Production Planning Standard** interface where production-related information can be displayed and managed in an organized format.
+The Angular frontend provides a responsive data-management interface, while the ASP.NET Core backend exposes REST APIs responsible for application logic and database communication. Microsoft SQL Server is used for persistent storage, with Entity Framework Core providing ORM and migration support.
 
-### 📋 Data Table
+The repository contains both frontend and backend applications within a single project structure.
 
-Production planning records are displayed through a structured table interface, making information easier to read, browse, and manage.
+## Core Features
 
-The table-based design is built using reusable frontend components and is suitable for handling larger datasets.
+* Production data management
+* Responsive data-grid interface
+* Search and dynamic filtering
+* Multi-field sorting
+* Pagination and configurable page size
+* Configurable table columns
+* Field Chooser with Select All and Clear controls
+* Persistent UI preferences using browser storage
+* Table configuration reset
+* RESTful API architecture
+* SQL Server persistence
+* Entity Framework Core migrations
+* JWT authentication configuration
+* Frontend/backend CORS configuration
+* Responsive desktop and mobile layouts
 
-### 🔗 Frontend & Backend Integration
+## Technology Stack
 
-The Angular frontend communicates with the .NET backend through REST APIs.
+| Layer                | Technologies                        |
+| -------------------- | ----------------------------------- |
+| Frontend             | Angular 21, TypeScript, HTML5, CSS3 |
+| UI                   | PrimeNG, Angular CDK                |
+| Backend              | ASP.NET Core Web API, .NET 10, C#   |
+| ORM                  | Entity Framework Core               |
+| Database             | Microsoft SQL Server 2022           |
+| Authentication       | JWT Bearer Authentication           |
+| API Documentation    | Swagger / OpenAPI                   |
+| Database Environment | Docker                              |
+| Development          | VS Code, DBeaver                    |
+| Version Control      | Git, GitHub                         |
 
-This keeps the presentation layer separate from the business and data-access layers and makes the application easier to maintain and extend.
+## Architecture
 
-### 🗄️ Database Integration
-
-The backend is connected to **Microsoft SQL Server** for persistent data storage.
-
-**Entity Framework Core** is used to communicate with the database, manage entities, and handle database operations.
-
-### 🌐 REST API
-
-The backend exposes API endpoints that can be consumed by the Angular frontend.
-
-The API architecture provides a foundation for operations such as:
-
-* Retrieving records
-* Adding new records
-* Updating existing information
-* Deleting records
-* Connecting production data with the frontend interface
-
-### 📱 Responsive Interface
-
-The frontend is designed to work across different screen sizes while maintaining a clean and structured layout.
-
-### 🎨 Component-Based UI
-
-The Angular application uses reusable components and **PrimeNG** UI elements to create a consistent interface, including tables and navigation elements.
-
----
-
-# 🛠️ Tech Stack
-
-## Frontend
-
-* Angular
-* TypeScript
-* HTML5
-* CSS3
-* PrimeNG
-
-## Backend
-
-* .NET Web API
-* C#
-* ASP.NET Core
-* Entity Framework Core
-* REST APIs
-
-## Database
-
-* Microsoft SQL Server
-* SQL Server running through Docker
-
-## Development Tools
-
-* Visual Studio Code
-* Docker Desktop
-* Git
-* GitHub
-* Entity Framework Core CLI
-
----
-
-# 🏗️ System Architecture
-
-The project follows a separated full-stack architecture:
+The application follows a conventional client-server architecture:
 
 ```text
-                USER
-                  │
-                  ▼
-        ┌───────────────────┐
-        │ Angular Frontend  │
-        │                   │
-        │ UI / Components   │
-        │ PrimeNG Tables    │
-        └─────────┬─────────┘
-                  │
-                  │ HTTP / REST API
-                  ▼
-        ┌───────────────────┐
-        │   .NET Web API    │
-        │                   │
-        │ Controllers       │
-        │ Business Logic    │
-        │ EF Core           │
-        └─────────┬─────────┘
-                  │
-                  ▼
-        ┌───────────────────┐
-        │    SQL Server     │
-        │                   │
-        │ Persistent Data   │
-        └───────────────────┘
+┌──────────────────────────────┐
+│       Angular Frontend       │
+│                              │
+│  Components • Services • UI  │
+└──────────────┬───────────────┘
+               │
+               │ HTTP / REST
+               ▼
+┌──────────────────────────────┐
+│     ASP.NET Core Web API     │
+│                              │
+│ Controllers • Business Logic │
+└──────────────┬───────────────┘
+               │
+               │ Entity Framework Core
+               ▼
+┌──────────────────────────────┐
+│     Microsoft SQL Server     │
+│                              │
+│       Persistent Data        │
+└──────────────────────────────┘
 ```
 
-The Angular application handles the user interface, while the .NET Web API processes requests and communicates with SQL Server through Entity Framework Core.
-
----
-
-# 📁 Project Structure
+## Repository Structure
 
 ```text
 Production-Planning-System/
@@ -147,13 +83,8 @@ Production-Planning-System/
 ├── frontend/
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── components/
-│   │   │   ├── pages/
-│   │   │   └── services/
-│   │   │
 │   │   ├── assets/
-│   │   └── styles/
-│   │
+│   │   └── ...
 │   ├── angular.json
 │   └── package.json
 │
@@ -161,241 +92,230 @@ Production-Planning-System/
 │   ├── Controllers/
 │   ├── Data/
 │   ├── Models/
+│   ├── Migrations/
 │   ├── Properties/
 │   ├── Program.cs
-│   └── appsettings.json
+│   └── ...
 │
-├── README.md
-└── .gitignore
+├── .gitignore
+└── README.md
 ```
 
----
+## Frontend
 
-# 🔄 How the Application Works
+The frontend is developed with **Angular 21** and provides the primary interface for interacting with production data.
 
-When a user interacts with the Angular interface, the frontend sends an HTTP request to the backend API.
+PrimeNG components are used alongside custom Angular and CSS implementations to provide a responsive enterprise-style interface.
 
-```text
-User Action
-     ↓
-Angular Component
-     ↓
-Angular Service
-     ↓
-HTTP Request
-     ↓
-.NET API
-     ↓
-Entity Framework Core
-     ↓
-SQL Server
-```
+### Data Grid
 
-The database returns the requested information to the backend.
+The primary data grid supports:
 
-The backend then sends a response to Angular, where the information is displayed to the user.
+* Searching
+* Filtering
+* Sorting
+* Pagination
+* Configurable page size
+* Dynamic field visibility
+* Persistent user preferences
 
----
+### Field Chooser
 
-# 🚀 Running the Project Locally
+Users can customize the information displayed in the grid by selecting individual fields.
 
-## Prerequisites
+The Field Chooser supports:
 
-Make sure the following are installed:
+* Individual field selection
+* Select All
+* Clear All
+* Apply changes
+* Persistent configuration
+* Reset to default configuration
 
-* Node.js
-* Angular CLI
-* .NET SDK
-* Docker Desktop
-* Git
+Selected table preferences are stored locally so the interface can retain its configuration between sessions.
 
----
+## Backend
 
-## 1. Clone the Repository
+The backend is implemented using **ASP.NET Core Web API on .NET 10**.
+
+It provides the application API layer and manages communication between the Angular client and SQL Server database.
+
+The backend architecture includes:
+
+* REST API endpoints
+* Entity Framework Core integration
+* Database migrations
+* Dependency injection
+* JWT Bearer authentication configuration
+* CORS configuration
+* OpenAPI documentation
+* Environment-specific configuration
+
+## Database
+
+**Microsoft SQL Server 2022** is used as the relational database management system.
+
+The local development database runs inside Docker and is exposed through port `1433`.
+
+Entity Framework Core handles database access and schema migrations.
 
 ```bash
-git clone <your-repository-url>
-
-cd Production-Planning-System
+dotnet ef migrations add <MigrationName>
+dotnet ef database update
 ```
 
----
+Database inspection and management can also be performed using DBeaver or another SQL Server-compatible database client.
 
-## 2. Start SQL Server
+## API
 
-Make sure Docker Desktop is running.
-
-Check the SQL Server container:
-
-```bash
-docker ps
-```
-
-The SQL Server container should be running on:
-
-```text
-localhost:1433
-```
-
----
-
-## 3. Run the Backend
-
-Navigate to the backend:
-
-```bash
-cd backend
-```
-
-Restore dependencies:
-
-```bash
-dotnet restore
-```
-
-Run the backend:
-
-```bash
-dotnet run
-```
-
-During local development, the API may run on an address similar to:
+During local development, the backend API runs at:
 
 ```text
 http://localhost:5271
 ```
 
-Use the URL shown in your terminal if the assigned development port is different.
-
----
-
-## 4. Run the Frontend
-
-Open another terminal and navigate to:
-
-```bash
-cd frontend
-```
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start Angular:
-
-```bash
-ng serve
-```
-
-Then open:
+The Angular development server runs at:
 
 ```text
 http://localhost:4200
 ```
 
----
+CORS is configured to allow communication between the Angular client and ASP.NET Core API during development.
 
-# 🔌 API Integration
+## Local Development
 
-Angular services are responsible for communicating with the backend.
+### Prerequisites
 
-A typical request flow is:
+Install the following before running the project:
 
-```text
-Angular
-   ↓
-HTTP Request
-   ↓
-.NET Controller
-   ↓
-Entity Framework Core
-   ↓
-SQL Server
-   ↓
-API Response
-   ↓
-Angular UI
-```
+* Node.js 20+
+* Angular CLI
+* .NET 10 SDK
+* Docker
+* Git
+* SQL Server-compatible database client (optional)
 
-This architecture keeps the frontend, backend, and database responsibilities separated.
-
----
-
-# 🗃️ Database
-
-Microsoft SQL Server is used as the relational database.
-
-The SQL Server instance can run inside a Docker container, allowing the development database environment to remain isolated from the local operating system.
-
-Entity Framework Core acts as the bridge between the .NET application and SQL Server.
-
-Database migrations can be applied using:
+### Clone
 
 ```bash
-dotnet ef database update
+git clone https://github.com/Mariam-N1/Production-Planning-System.git
+cd Production-Planning-System
 ```
 
----
+### Database
 
-# 🎯 Project Objectives
+Start the SQL Server Docker container:
 
-This project was built to gain practical experience with:
+```bash
+docker start sqlserver
+```
 
-* Building a complete full-stack application
-* Developing REST APIs with ASP.NET Core
-* Connecting Angular with a .NET backend
-* Working with SQL Server
-* Using Entity Framework Core
-* Managing relational application data
-* Building responsive Angular interfaces
-* Using PrimeNG components
-* Understanding frontend/backend separation
-* Working with Docker-based databases
-* Managing source code with Git and GitHub
+Verify its status:
 
----
+```bash
+docker ps
+```
 
-# 🔮 Future Improvements
+### Backend
 
-The system can be expanded with additional production-management functionality, including:
+```bash
+cd backend
+dotnet restore
+dotnet ef database update
+dotnet run
+```
 
-* User authentication and authorization
-* Role-based access control
-* Advanced CRUD operations
+The API should become available at:
+
+```text
+http://localhost:5271
+```
+
+### Frontend
+
+From a separate terminal:
+
+```bash
+cd frontend
+npm install
+ng serve
+```
+
+Open:
+
+```text
+http://localhost:4200
+```
+
+## Configuration
+
+Sensitive application configuration should remain outside source control.
+
+The backend supports .NET User Secrets for development configuration, including:
+
+```text
+ConnectionStrings:DefaultConnection
+Jwt:Key
+```
+
+Example:
+
+```bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<connection-string>"
+dotnet user-secrets set "Jwt:Key" "<secure-jwt-key>"
+```
+
+Production deployments should use environment variables or an appropriate secrets-management solution.
+
+## API Development
+
+Swagger/OpenAPI support is available in the development environment for API inspection and endpoint testing.
+
+This allows backend endpoints to be tested independently before integration with the Angular client.
+
+## Planned Development
+
+The architecture is designed to support additional production-planning capabilities, including:
+
+* Role-based authorization
 * Production scheduling
-* Inventory integration
-* Search and filtering
-* Sorting and pagination
-* Production status tracking
-* Reporting dashboards
-* Data visualization
-* Notifications
-* Export to Excel/PDF
-* Deployment to a cloud environment
+* Material and inventory planning
+* Production status workflows
+* Reporting and analytics
+* KPI dashboards
+* Data export
+* Audit logging
+* Notification workflows
+* Automated testing
+* Cloud deployment
+
+## Engineering Considerations
+
+The project emphasizes:
+
+**Separation of concerns** — frontend, API, and persistence responsibilities are maintained independently.
+
+**Persistence** — production data is stored in SQL Server rather than relying solely on client-side state.
+
+**Configuration security** — credentials and authentication secrets remain outside the repository.
+
+**Maintainability** — the project structure allows frontend and backend functionality to evolve independently.
+
+**Responsive design** — data-management functionality remains accessible across different viewport sizes.
+
+**Extensibility** — the architecture provides a foundation for additional planning, reporting, authentication, and workflow capabilities.
 
 ---
 
-# 💡 What I Learned
+## Author
 
-Building this project helped me understand how the different layers of a full-stack application work together.
+**Hafiza Mariam Nadeem**
 
-Rather than creating only a frontend interface, I worked with the complete application flow:
+Computer Science
+Full-Stack Development
 
-**Angular → REST API → .NET → Entity Framework Core → SQL Server**
-
-The project also provided practical experience with database configuration, API integration, Docker, responsive frontend development, debugging, and Git/GitHub workflows.
-
----
-
-# 📄 License
-
-This project is intended for educational and portfolio purposes.
+GitHub: `Mariam-N1`
 
 ---
 
-## ⭐ Production Planning System
-
-A practical full-stack project demonstrating the integration of **Angular, ASP.NET Core Web API, Entity Framework Core, SQL Server, PrimeNG, and Docker** in a structured production planning application.
-
+**Status:** Active Development
